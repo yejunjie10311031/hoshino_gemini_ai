@@ -37,7 +37,7 @@ def gy():
     QMessageBox.information(
     window,
     '关于',
-    '必须先填写google api key,没有的可以去ai.google.dev注册账号并获取一个key。\n如果没有出现回答结果，可能key有问题或回答的内容无法通过google ai的安全审核。\n发送语句之后，会调用cpu进行处理，把回答合成语音并播放，因此等待语音的时间取决于你的cpu性能，有时候需要等很长时间。')
+    '必须先填写google api key,没有的可以去aistudio.google.com注册账号并获取一个key。\n如果没有出现回答结果，可能key有问题或回答的内容无法通过google ai的安全审核。\n发送语句之后，会调用cpu进行处理，把回答合成语音并播放，因此等待语音的时间取决于你的cpu性能，有时候需要等很长时间。')
 
 about.clicked.connect(gy)
 
@@ -85,9 +85,10 @@ fs.move(870,450)
 fs.setEnabled(True)
 
 def send():
+    global key
     global reply
     send=talk.toPlainText()
-    re = gemini.reply(send)  
+    re = gemini.reply(key,send)  
     
     def speak_reply():
         speak(re)
