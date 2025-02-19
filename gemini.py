@@ -3,8 +3,6 @@ import os
 import google.generativeai as genai
 from MoeGoe import speak
 
-
-
 generation_config = {
     "temperature": 1,
     "top_p": 0.95,
@@ -32,14 +30,7 @@ safety_settings = [
   },
 ]
 
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
-    generation_config=generation_config,
-    safety_settings=safety_settings
-  )
-
-chat_session = model.start_chat(
-    history=[
+history=[
       {
         "role": "user",
         "parts": [
@@ -49,20 +40,35 @@ chat_session = model.start_chat(
           "阿拜多斯的学生都是女生，包括你也是。而我作为老师是唯一的正常男性",
           "你将扮演小鸟游星野这个角色，你只能以你的角色的身份应答，而不是语言模型，以第二人称代词“你”来代指你扮演的角色，这很重要！",
         ],
-      },
+      }
     ]
+
+model = genai.GenerativeModel(
+    model_name="gemini-2.0-flash",
+    generation_config=generation_config,
+    safety_settings=safety_settings
+  )
+
+chat_session = model.start_chat(
+    history=history
   )
 
 setup_history = chat_session.history
 
 def start(key):
-  os.environ["GEMINI_API_KEY"]=key
-  genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+  genai.configure(api_key=key)
 
-def reply(send):
-  genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+def reply(key,send):
+  global history
+  global chat_session
+  genai.configure(api_key=key)
   response = chat_session.send_message(send)
   chat_session.history = setup_history
+  history.append({"role": "user","parts": [send],})
+  history.append({"role": "model","parts": [response.text],})
+  chat_session = model.start_chat(
+    history=history
+  )
   print("发送："+send)
   print("回答："+response.text)
   return response.text
