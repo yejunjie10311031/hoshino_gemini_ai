@@ -87,8 +87,9 @@ net_g_ms = SynthesizerTrn(
 _ = net_g_ms.eval()
 utils.load_checkpoint(model, net_g_ms)
 
-def speak(text):
-
+def speak(text,state,button_state):
+    ex_print(_clean_text(
+        text, hps_ms.data.text_cleaners), True)
     length_scale, text = get_label_value(
         text, 'LENGTH', 1, 'length scale')
     noise_scale, text = get_label_value(
@@ -100,7 +101,7 @@ def speak(text):
     stn_tst = get_text(text, hps_ms, cleaned=cleaned)
 
     print_speakers(speakers, False)
-    speaker_id = 10
+    speaker_id = 0
     out_path = "reply.wav"
 
     with no_grad():
@@ -112,6 +113,7 @@ def speak(text):
 
 
     write(out_path, hps_ms.data.sampling_rate, audio)
+    state.setText("正在播放语音")
     print("正在播放")
     pygame.mixer.init()
     pygame.mixer.music.load("reply.wav")
@@ -120,4 +122,6 @@ def speak(text):
         pygame.time.Clock().tick(10)
     pygame.mixer.music.unload()
     pygame.mixer.quit() 
-    print("完成播放")   
+    print("完成播放")
+    state.setText("")
+    button_state.setEnabled(True)
