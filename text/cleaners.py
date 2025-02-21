@@ -23,24 +23,27 @@ def korean_cleaners(text):
 
 
 def chinese_cleaners(text):
-    '''Pipeline for Chinese text'''
-    from text.mandarin import number_to_chinese, chinese_to_bopomofo, latin_to_bopomofo
-    text = number_to_chinese(text)
-    text = chinese_to_bopomofo(text)
-    text = latin_to_bopomofo(text)
-    text = re.sub(r'([ˉˊˇˋ˙])$', r'\1。', text)
+    from text.mandarin import chinese_to_romaji
+    text = chinese_to_romaji(text)
+    text = re.sub(r'\s+$', '', text)
+    text = re.sub(r'([^\.,!\?\-…~])$', r'\1.', text)
     return text
 
 
 def zh_ja_mixture_cleaners(text):
     from text.mandarin import chinese_to_romaji
     from text.japanese import japanese_to_romaji_with_accent
-    text = re.sub(r'\[ZH\](.*?)\[ZH\]',
-                  lambda x: chinese_to_romaji(x.group(1))+' ', text)
-    text = re.sub(r'\[JA\](.*?)\[JA\]', lambda x: japanese_to_romaji_with_accent(
-        x.group(1)).replace('ts', 'ʦ').replace('u', 'ɯ').replace('...', '…')+' ', text)
-    text = re.sub(r'\s+$', '', text)
-    text = re.sub(r'([^\.,!\?\-…~])$', r'\1.', text)
+    if "[ZH]" in text:
+        text = text[len("[ZH]"):]
+        text = text[:-len("[ZH]")]
+        text = chinese_to_romaji(text)
+        text = re.sub(r'\s+$', '', text)
+        text = re.sub(r'([^\.,!\?\-…~])$', r'\1.', text)
+    if "[JA]" in text:
+        text = text[len("[JA]"):]
+        text = text[:-len("[JA]")]
+        text = japanese_to_romaji_with_accent(text)
+        text = re.sub(r'([A-Za-z])$', r'\1.', text)
     return text
 
 
